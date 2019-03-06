@@ -1,0 +1,109 @@
+/**
+        * Question 1::
+        * Look up java plugin documentation. Make changes in manifest to make it executable with correct class.
+        * When run using java -jar JAR_NAME_HERE the output should be text "Hello World" on the console.
+ */
+
+//It creates a thin jar
+jar
+        {
+            manifest
+                    {
+                        /**
+                         * Main-class is key in which we pass the values as the path of the main class
+                         * which is called when we execute the jar
+                         */
+                        /**
+                         * Implementation-Version tells us about the version of the Jar
+                         * which can be seen in the MANIFEST.MF file
+                         */
+                        attributes 'Main-class' : 'Gradle.App',
+                                'Implementation-Version' : 1.0
+                    }
+            /**
+             * base-name is used to define the file name of the jar while creating it
+             */
+            baseName="Custom Thin Jar"
+        }
+
+/**
+        * Question 2::
+        * look up idea plugin. make changes in build.gradle so that the sources of src/main/java as well as src/main/java2 are taken as sources.
+        * Ensure that when you make JAR file class files in both are added to the JAR.
+        * This will teach you how projects with non-conventional structure can be used with gradle.
+ */
+/**
+        * Question 3::
+        * mytask 2 files file1.xml and file1.txt in src/main/resources manually.
+        * make changes so that when creating jar only file1.xml is added to the jar.
+ */
+//sourceSets defines the sources of files which need to be included in the JAR files
+sourceSets {
+    main
+            {
+                java
+                        {
+                            //srcDirs defines the path of the source files
+                            srcDirs=['src/main/java/Gradle','src/main/java2/Gradle']
+                        }
+                resources
+                        {
+                            srcDirs=['src/main/resources']
+                            /**
+                             * exclude is used to exclude file's in building jar it is written inside resources block
+                             * so that we exclude the file's present in the resources
+                             */
+                            exclude 'file1.txt'
+                        }
+            }
+}
+/**
+        * Question 4::
+        * find how to what is an uberjar. Make changes so you can use commons lang3 StringUtil in your jar.
+        * Make this uber jar executable.
+        * The output should be text but that should be using the StringUtils class of commons lang3
+ */
+//task to create fatJar
+task uberJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'Gradle'
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it)} }
+    with jar
+
+}
+/**
+        * Question 6::
+        * Write a task in file "mytasks.gradle" and use it in your build.gradle
+ */
+//apply is use to add the local gradle file in it
+apply from : "mytask.gradle"
+
+/**
+        * Question 5::
+        * Find a maven repository and add it as a repository. You can use bintray, jcenter
+*/
+repositories {
+    // Use jcenter for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+
+    //Using mavenCentral for resolving the dependencies.
+    mavenCentral()
+}
+
+dependencies {
+    // This dependency is found on compile classpath of this component and consumers.
+    implementation 'com.google.guava:guava:27.0.1-jre'
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    //This dependency is used to mytask StringUtils class
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
+    // Use the latest Groovy version for Spock testing
+    testImplementation 'org.codehaus.groovy:groovy-all:2.5.4'
+
+    // Use the awesome Spock testing and specification framework even with Java
+    testImplementation 'org.spockframework:spock-core:1.2-groovy-2.5'
+    testImplementation 'junit:junit:4.12'
+}
